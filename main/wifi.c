@@ -339,8 +339,14 @@ void wifi_init() {
         size_t sta_password_len = sizeof(config_sta.sta.password);
         config_get_str_blob(CONF_ITEM(KEY_CONFIG_WIFI_STA_PASSWORD), &config_sta.sta.password, &sta_password_len);
         sta_password_len--; // Remove null terminator from length
+
         config_sta.sta.scan_method = config_get_bool1(CONF_ITEM(KEY_CONFIG_WIFI_STA_SCAN_MODE_ALL))
                 ? WIFI_ALL_CHANNEL_SCAN : WIFI_FAST_SCAN;
+
+        esp_err_t ret = esp_netif_set_hostname(esp_netif_sta ,(char *)config_ap.ap.ssid); 
+        if(ret != ESP_OK ){
+            ESP_LOGI(TAG,"failed to set hostname:%d",ret);  
+        }
 
         ESP_LOGI(TAG, "WIFI_STA_CONNECTING: %s (%s), %s scan", config_sta.sta.ssid,
                 sta_password_len == 0 ? "open" : "with password",
@@ -349,6 +355,7 @@ void wifi_init() {
                 sta_password_len == 0 ? 'O' : 'P',
                 config_sta.sta.scan_method == WIFI_ALL_CHANNEL_SCAN ? 'A' : 'F');
     }
+
 
     // Listen for WiFi and IP events
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_START, &handle_sta_start, NULL));
@@ -363,6 +370,7 @@ void wifi_init() {
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &handle_sta_got_ip, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_LOST_IP, &handle_sta_lost_ip, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_AP_STAIPASSIGNED, &handle_ap_sta_ip_assigned, NULL));
+
 
     // Configure and connect
     wifi_mode_t wifi_mode;
