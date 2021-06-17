@@ -108,7 +108,6 @@ static void socket_client_task(void *ctx) {
         destroy_socket(&sock);
 
         free(host);
-        free(connect_message);
     }
 
     vTaskDelete(NULL);
